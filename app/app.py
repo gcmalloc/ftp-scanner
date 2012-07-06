@@ -1,14 +1,17 @@
-from bottle import app
+from bottle import app, run
 
-a = app(__file__)
+ftp_server = app()
 
-@app.route("/")
+@ftp_server.route("/")
 def return_main_page():
     return render_template("main.html")
 
-@app.route("/update")
+@ftp_server.route("/update")
 def return_update():
     jsonify(get_server_list())
 
 def get_server_list():
+    return "{}"
 
+if __name__ == "__main__":
+    run(ftp_server)
