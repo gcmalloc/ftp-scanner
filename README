@@ -1,0 +1,9 @@
+== component ==
+
+ip:{string (v4,v6}
+host:{string}
+status:{UP, DOWN}
+check_last:{epoch, UTC}
+up_number:{unsi int}
+down_number:{}
+ping
