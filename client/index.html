@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<head>
+  <title>FTP Scanner</title>
+ 		<link rel="stylesheet" media="screen" type="text/css" title="Default" href="style.css" />
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="tablesorter.js"></script>
+  <script type="text/javascript">
+    JSON_URL = "servers.json";
+    REFRESH = 300;
+
+    $(document).ready(function() {
+        $('#servers').tablesorter({
+          debug: true,
+          headers: {0: {sorter: 'url'}}
+          });
+        get_data();
+
+        timer();
+        setInterval(timer, 1000);
+      });
+
+    remaining = REFRESH;
+    timer = function () {
+      if (remaining == 0) {
+        remaining = REFRESH;
+        get_data();
+      }
+      $("#counter").html(remaining);
+      remaining -= 1;
+    }
+
+    get_data = function () {
+      var items = [];
+
+      $.getJSON(JSON_URL, function (data) {
+        $.each(data.servers, function(id) {
+          var line = [];
+
+          // Flush the table
+          $('#servers tbody').empty();
+
+          // Handle clickable address column
+          line.push('<td id="ip"><a href="ftp://' + data.servers[id]['address']
+            + '/">' + data.servers[id]['address'] + '</a></td>');
+          delete data.servers[id]['address'];
+
+          // Others columns
+          $.each(data.servers[id], function(key, value) {
+            line.push('<td id="' + key + '">' + value + '</td>');
+          });
+
+          // Push the line to items
+          items.push('<tr>' + line.join('') + '</tr>');
+        });
+
+        // Add items to the table
+        $('#servers tbody').append(items.join(''));
+
+        // Trigger update event so tablesorter will sort the table again
+        $('#servers').trigger('update');
+      });
+    }
+  </script>
+</head>
+<body>
+  <div id="content">
+    <h1>FTP Scanner</h1>
+    <table id="servers" class="tablesorter">
+      <thead>
+        <tr>
+          <th>Address</th>
+          <th>Host</th>
+          <th>State</th>
+          <th>Last check</th>
+          <th>Up</th>
+          <th>Down</th>
+          <th>Ping</th>
+        </tr>
+      </thead>
+      <div id="refresh">Next refresh in <span id="counter"></span></div>
+      <tbody>
+        <tr><td>1.1.1.1</td><td>foo</td><td>up</td><td>12</td><td>2</td><td>3</td><td>123</td></tr>
+        <tr><td>1.1.1.2</td><td>bar</td><td>up</td><td>12</td><td>2</td><td>3</td><td>123</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
+<!-- vim: set ts=2 sts=2 sw=2 et :
