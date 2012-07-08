@@ -4,14 +4,14 @@
 			"host": "host.rmll",
 			"status": "up",
 			"check_last": "1341595817",
-			"up-number": 42,
+			"up_number": 42,
 			"down_number": 3,
 			"ping": 81 },
 		{ "address": "192.168.2.2",
 			"host": "host2",
 			"status": "up",
 			"check_last": "1341596817",
-			"up-number": 2,
+			"up_number": 2,
 			"down_number": 8,
 			"ping": 105 }
 		]
