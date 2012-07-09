@@ -1,1 +1,0 @@
-jquery.tablesorter.min.js
