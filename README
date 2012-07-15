@@ -1,3 +1,5 @@
+== Description ==
+A simple ftp scanner with a webinterface 
 == component ==
 
 ip:{string (v4,v6}
