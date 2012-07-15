@@ -42,7 +42,7 @@ class ServerTester(Process):
     """A forked process that test the server at regular interval,
     the default is 5 minute. The ip range should be in CIDR notation
     """
-    def __init__(self, ip_range, conn, poll_interval=300)):
+    def __init__(self, ip_range, conn, poll_interval=300):
         """Create the new poller process.
             ip_range -- The CIDR range notation to poll.
             conn -- The connection to a SQL database with enough right to
@@ -114,7 +114,7 @@ class ServerTester(Process):
             ip_range = self._get_range()
             for server_ip in self._get_range():
                 self.update_db_entry(server_ip)
-            time.sleep(self.connection)
+            time.sleep(self.interval)
 
     @dbwrap
     def update_db_entry(self, cursor, server):
