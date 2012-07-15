@@ -9,6 +9,7 @@ from bottle import Bottle, run, template, static_file
 import oursql
 import json
 import datetime
+import time
 
 ftp_server = Bottle()
 
@@ -37,10 +38,8 @@ def return_update():
     ret_dict = dict()
     ret_dict['servers'] = [dict(zip(map(lambda a: a[0], fields_name), row)) for row in rows]
     #TODO: change this, looking for a better json parser that can handle
-    ret_dict['servers']
     db.close()
-    print(ret_dict)
-    handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
+    handler = lambda obj: int(time.mktime(obj.timetuple())) if isinstance(obj, datetime.datetime) else None
     return json.dumps(ret_dict, default=handler)
 
 if __name__ == "__main__":
