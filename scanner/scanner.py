@@ -39,13 +39,13 @@ def dbwrap(func):
     return new_func
 
 class ServerTester(Process):
-    """A forked process that test the server at regular interval, 
+    """A forked process that test the server at regular interval,
     the default is 5 minute. The ip range should be in CIDR notation
     """
-    def __init__(self, ip_range, conn, poll_interval=300):
+    def __init__(self, ip_range, conn, poll_interval=300)):
         """Create the new poller process.
             ip_range -- The CIDR range notation to poll.
-            conn -- The connection to a SQL database with enough right to 
+            conn -- The connection to a SQL database with enough right to
                     add table or at least insert into a table named servers.
             poll_interval -- The waiting time of the process.
         """
@@ -68,7 +68,7 @@ class ServerTester(Process):
                 serv_host = socket.gethostbyaddr(serv_ip)[1][0]
             except socket.error:
                 hostname = ""
-            logging.debug("insert ip:{} hostname:{}".format(serv_ip, serv_host))
+            logging.debug("insert address:{} host:{}".format(serv_ip, serv_host))
             cursor.execute("""INSERT INTO servers VALUES (
                                 ?,
                                 ?,
@@ -88,15 +88,17 @@ class ServerTester(Process):
     def create_table(self, cursor):
         """Create the servers table in self.conn. init the database table "servers".
         """
-        cursor.execute("""CREATE TABLE IF NOT EXISTS servers (
-                            adress VARCHAR(15) NOT NULL,
-                            hostname CHAR(50),
+        cursor.execute("""DROP TABLE servers;
+        """)
+        cursor.execute("""CREATE TABLE IF NOT EXISTS servers(
+                            address VARCHAR(15) NOT NULL,
+                            host CHAR(50),
                             status TINYINT(1),
                             ping FLOAT UNSIGNED,
                             up_number INT UNSIGNED,
                             down_number INT UNSIGNED,
-                            last_check TIMESTAMP,
-                            PRIMARY KEY(adress))""")
+                            check_last TIMESTAMP,
+                            PRIMARY KEY(address))""")
 
     def _get_range(self):
         """Return the ip range as a generator for this poller
@@ -105,7 +107,7 @@ class ServerTester(Process):
             yield str(i)
 
     def run(self):
-        """Run the process, start the poller and 
+        """Run the process, start the poller and
         """
         self.init_db()
         while True:
@@ -130,18 +132,18 @@ class ServerTester(Process):
         status = test_by_login(server)
         if status:
             logging.debug("updating entry {} with status:True ping:{} ".format(server, ping_time))
-            cursor.execute("""UPDATE servers SET 
-                                status=TRUE, 
-                                ping=?, 
-                                up_number = up_number + 1 
-                                where adress = ?""", (ping_time, server))
+            cursor.execute("""UPDATE servers SET
+                                status=TRUE,
+                                ping=?,
+                                up_number = up_number + 1
+                                where address = ?""", (ping_time, server))
         else:
             logging.debug("updating entry {} with status:False ping:{} ".format(server, ping_time))
-            cursor.execute("""UPDATE servers SET 
-                                status=FALSE, 
-                                ping=?, 
-                                down_number = down_number + 1 
-                                where adress = ?""", (ping_time, server))
+            cursor.execute("""UPDATE servers SET
+                                status=FALSE,
+                                ping=?,
+                                down_number = down_number + 1
+                                where address = ?""", (ping_time, server))
 
 
 def test_by_login(server, timeout=10):
@@ -174,7 +176,10 @@ def ping(ip_addr):
 
 if __name__ == "__main__":
     #just a dummy test
+
     logging.root.setLevel(logging.DEBUG)
     logging.debug("debbug is on")
     test_conn = oursql.connect(host='127.0.0.1', user='server_app', passwd='metametame', db='server')
-    ServerTester("127.0.0.1", test_conn).start()
+    s = ServerTester("127.0.0.1", test_conn)
+    s.create_table()
+    s.start()
