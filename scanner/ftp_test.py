@@ -11,7 +11,6 @@ class TestFtpTester(unittest.TestCase):
     UP_HOST = "google.ch"
 
     def test_login_test_bad(self):
-        #test some server that doesn't contain
         ftp_up = scanner.test_by_login(TestFtpTester.NOT_FTP_ADDRESS, timeout=3)
         self.assertFalse(ftp_up)
 
