@@ -44,3 +44,8 @@ def return_update():
 
 if __name__ == "__main__":
     run(ftp_server, reloader=True)
+config = configparser.ConfigParser()
+config.readfp(open('config'))
+db_config = config['Database']
+plugin = oursql.connect(host=db_config['host'], user=db_config['user'],
+                        passwd=db_config['password'], db=db_config['database'])

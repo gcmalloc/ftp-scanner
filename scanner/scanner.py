@@ -174,12 +174,15 @@ def ping(ip_addr):
     else:
         return 0
 
-if __name__ == "__main__":
-    #just a dummy test
 
-    logging.root.setLevel(logging.DEBUG)
-    logging.debug("debbug is on")
-    test_conn = oursql.connect(host='127.0.0.1', user='server_app', passwd='metametame', db='server')
-    s = ServerTester("127.0.0.1", test_conn)
+if __name__ == "__main__":
+    #just a launcher
+
+    config = configparser.ConfigParser()
+    config.readfp(open('config'))
+    db_config = config['Database']
+    test_conn = oursql.connect(host=db_config['host'], user=db_config['user'],
+                               passwd=db_config['password'], db=db_config['database'])
+    s = ServerTester(config['Scan']['range'], test_conn)
     s.create_table()
     s.start()

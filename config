@@ -1,0 +1,7 @@
+[Database]
+host=127.0.0.1
+database=server
+user=server_app
+password=metametame
+[Scan]
+range=127.0.0.1
