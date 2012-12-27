@@ -11,7 +11,7 @@ import logging
 import os
 import configparser
 
-import oursql
+import mysql.connector
 
 
 def dbwrap(func):
@@ -78,8 +78,8 @@ class ServerTester(Process):
                 hostname = ""
             logging.debug("insert address:{} host:{}".format(serv_ip, hostname))
             cursor.execute("""INSERT INTO servers VALUES (
-                                ?,
-                                ?,
+                                %s,
+                                %s,
                                 FALSE,
                                 0,
                                 0,
@@ -131,6 +131,7 @@ class ServerTester(Process):
         while True:
             ip_range = self._get_range()
             for server_ip in ip_range:
+                print("testing {0}".format(server_ip))
                 self.update_db_entry(server_ip)
             time.sleep(self.interval)
 
@@ -155,16 +156,16 @@ class ServerTester(Process):
             logging.debug("updating entry {} with status:True ping:{} ".format(server, ping_time))
             cursor.execute("""UPDATE servers SET
                                 status=TRUE,
-                                ping=?,
+                                ping=%s,
                                 up_number = up_number + 1
-                                where address = ?""", (ping_time, server))
+                                where address = %s""", (ping_time, server))
         else:
             logging.debug("updating entry {} with status:False ping:{} ".format(server, ping_time))
             cursor.execute("""UPDATE servers SET
                                 status=FALSE,
-                                ping=?,
+                                ping=%s,
                                 down_number = down_number + 1
-                                where address = ?""", (ping_time, server))
+                                where address = %s""", (ping_time, server))
 
 
 def test_by_login(server, timeout=10):
@@ -212,7 +213,7 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.readfp(open('config'))
     db_config = config['Database']
-    test_conn = oursql.connect(host=db_config['host'], user=db_config['user'],
+    test_conn = mysql.connector.connect(host=db_config['host'], user=db_config['user'],
                                passwd=db_config['password'], db=db_config['database'])
     s = ServerTester(config['Scan']['range'], test_conn)
     s.create_table()

@@ -5,7 +5,7 @@ It return an interface for a GET method in the root folder, and the list
 of servers in the /servers.
 """
 from bottle import Bottle, run, static_file
-import oursql
+import mysql.connector
 import json
 import datetime
 import time
@@ -16,7 +16,7 @@ scanner_app = Bottle()
 config = configparser.ConfigParser()
 config.readfp(open('config'))
 db_config = config['Database']
-plugin = oursql.connect(host=db_config['host'], user=db_config['user'],
+plugin = mysql.connector.connect(host=db_config['host'], user=db_config['user'],
                         passwd=db_config['password'], db=db_config['database'])
 
 
@@ -56,4 +56,4 @@ def return_update():
 
 if __name__ == "__main__":
     #a test server
-    run(scanner_app, reloader=True)
+    run(scanner_app, reloader=True, host='0.0.0.0', port='80')
