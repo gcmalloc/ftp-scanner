@@ -70,10 +70,12 @@ class ServerTester(Process):
         """
         self.create_table()
         self.clean_table()
-
+        default_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(1)
         for serv_ip in self._get_range():
+            logging.info("Filling information for {0}".format(serv_ip))
             try:
-                hostname = socket.gethostbyaddr(serv_ip)[1][0]
+                hostname = socket.gethostbyaddr(serv_ip)[0]
             except socket.error:
                 hostname = ""
             logging.debug("insert address:{} host:{}".format(serv_ip, hostname))
@@ -85,6 +87,7 @@ class ServerTester(Process):
                                 0,
                                 0,
                                 0)""", (serv_ip, hostname,))
+        socket.setdefaulttimeout(default_timeout)
 
     @dbwrap
     def clean_table(self, cursor):
@@ -104,7 +107,7 @@ class ServerTester(Process):
         ----------
         cursor -- the cursor to the database.
         """
-        cursor.execute("""DROP TABLE servers;
+        cursor.execute("""DROP TABLE IF EXISTS servers ;
         """)
         cursor.execute("""CREATE TABLE IF NOT EXISTS servers(
                             address VARCHAR(15) NOT NULL,
@@ -114,7 +117,8 @@ class ServerTester(Process):
                             up_number INT UNSIGNED,
                             down_number INT UNSIGNED,
                             check_last TIMESTAMP,
-                            PRIMARY KEY(address))""")
+                            PRIMARY KEY(address))
+                            """)
 
     def _get_range(self):
         """
@@ -131,7 +135,7 @@ class ServerTester(Process):
         while True:
             ip_range = self._get_range()
             for server_ip in ip_range:
-                print("testing {0}".format(server_ip))
+                logging.info("testing {0}".format(server_ip))
                 self.update_db_entry(server_ip)
             time.sleep(self.interval)
 
@@ -209,12 +213,14 @@ def ping(ip_addr):
 
 if __name__ == "__main__":
     #just a launcher
-
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Parsing documentation")
     config = configparser.ConfigParser()
     config.readfp(open('config'))
     db_config = config['Database']
+    logging.info("Connecting to DB")
     test_conn = mysql.connector.connect(host=db_config['host'], user=db_config['user'],
                                passwd=db_config['password'], db=db_config['database'])
     s = ServerTester(config['Scan']['range'], test_conn)
     s.create_table()
-    s.start()
+    s.run()
