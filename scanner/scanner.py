@@ -10,9 +10,8 @@ import re
 import logging
 import os
 import configparser
-
 import mysql.connector
-
+from twisted.internet import threads, reactor
 
 def dbwrap(func):
     """Wrap a function in an idomatic SQL transaction.  The wrapped function
@@ -136,7 +135,10 @@ class ServerTester(Process):
         while True:
             for server_ip in ip_range:
                 logging.info("testing {0}".format(server_ip))
-                self.update_db_entry(server_ip)
+                commands = [(self.update_db_entry, [server_ip], {})]
+                #self.update_db_entry(server_ip)
+            threads.callMultipleInThread(commands)
+            reactor.run()
             time.sleep(self.interval)
 
     @dbwrap
