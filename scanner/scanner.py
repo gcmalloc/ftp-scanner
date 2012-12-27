@@ -132,8 +132,8 @@ class ServerTester(Process):
         Run the process, start the poller.
         """
         self.init_db()
+        ip_range = self._get_range()
         while True:
-            ip_range = self._get_range()
             for server_ip in ip_range:
                 logging.info("testing {0}".format(server_ip))
                 self.update_db_entry(server_ip)
